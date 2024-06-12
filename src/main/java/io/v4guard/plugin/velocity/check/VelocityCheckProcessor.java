@@ -14,6 +14,7 @@ import org.geysermc.floodgate.api.FloodgateApi;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class VelocityCheckProcessor extends CheckProcessor<LoginEvent> {
@@ -64,7 +65,12 @@ public class VelocityCheckProcessor extends CheckProcessor<LoginEvent> {
                         if (checkData.isWaitMode()) {
                             event.setResult(ComponentResult.denied(Component.text(checkData.getKickReason())));
                         } else {
-                            event.getPlayer().disconnect(Component.text(checkData.getKickReason()));
+                            this.plugin.getServer().getScheduler()
+                                .buildTask(plugin, () -> {
+                                    event.getPlayer().disconnect(Component.text(checkData.getKickReason()));
+                                })
+                                .delay(150L, TimeUnit.MILLISECONDS)
+                                .schedule();
                         }
                     }
                 });
